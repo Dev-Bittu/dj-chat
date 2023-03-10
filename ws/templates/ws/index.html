@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Index</title>
+</head>
+<body style="background-color: black;">
+<h3>ROOM: {{ group_name }}</h3>
+<textarea cols=55 rows=30 id="msg-box" disabled></textarea>
+<p>
+<input type="text" id="msg-input" placeholder="Type Message...">
+<input type="submit" id="msg-submit">
+</p>
+
+<script>
+let ws = new WebSocket('ws://127.0.0.1:8000/room/{{ group_name }}/');
+ws.onopen = (event) => {
+	console.log('Ws opened... '+event);
+}
+ws.onmessage = (event) => {
+	const msg = event.data;
+	document.querySelector("#msg-box").value += (msg+"\n")
+	
+}
+ws.onclose = (event) => {
+	console.log("Ws closed...")
+}
+
+document.getElementById("msg-submit").onclick = () => {
+	const msg_input = document.getElementById('msg-input')
+	ws.send(msg_input.value)
+	msg_input.value = ""
+}
+</script>
+</body>
+</html>
