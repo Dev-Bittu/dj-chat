@@ -5,15 +5,24 @@ from .models import Chat, Group
 
 class ChatConsumer(SyncConsumer):
 	def websocket_connect(self, event):
-		self.group_name = self.scope['url_route']['kwargs']['group_name'] #getting group_name from request (scope) and setting it to public
-		async_to_sync(self.channel_layer.group_add)(
-			self.group_name,
-			self.channel_name
-		) #adding/creating group
-		self.send({
-			'type': 'websocket.accept'
-		}) #accepting user
-		
+		if self.scope['user'].is_authenticated:
+			self.group_name = self.scope['url_route']['kwargs']['group_name'] #getting group_name from request (scope) and setting it to public
+			async_to_sync(self.channel_layer.group_add)(
+				self.group_name,
+				self.channel_name
+			) #adding/creating group
+			self.send({
+				'type': 'websocket.accept'
+			}) #accepting user
+		else:
+			self.send({
+				'type': 'websocket.accept'
+			})
+			self.send({
+				'type': 'websocket.send',
+				'text': 'Login Required'
+			}) 	
+			raise StopConsumer()
 	
 	def websocket_disconnect(self, event):
 		async_to_sync(self.channel_layer.group_discard)(
