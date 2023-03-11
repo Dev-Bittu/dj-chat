@@ -5,7 +5,11 @@
 </head>
 <body style="background-color: black;">
 <h3>ROOM: {{ group_name }}</h3>
-<textarea cols=55 rows=30 id="msg-box" disabled></textarea>
+<textarea cols=55 rows=30 id="msg-box" disabled>
+{% for chat in chats %}
+{{ chat.msg }}
+{% endfor %}
+</textarea>
 <p>
 <input type="text" id="msg-input" placeholder="Type Message...">
 <input type="submit" id="msg-submit">

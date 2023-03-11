@@ -1,8 +1,9 @@
 from channels.consumer import SyncConsumer
 from channels.exceptions import StopConsumer
 from asgiref.sync import async_to_sync
+from .models import Chat, Group
 
-class Chat(SyncConsumer):
+class ChatConsumer(SyncConsumer):
 	def websocket_connect(self, event):
 		self.group_name = self.scope['url_route']['kwargs']['group_name'] #getting group_name from request (scope) and setting it to public
 		async_to_sync(self.channel_layer.group_add)(
@@ -29,7 +30,10 @@ class Chat(SyncConsumer):
 			'type': 'chat.message',
 			'message': event
 		}) #send incoming message to group
-	
+		group = Group.objects.get(name=self.group_name)
+		chat = Chat(msg = event['text'],group=group)
+		chat.save()
+		
 	def chat_message(self, event):
 		self.send({
 		'type': 'websocket.send',
